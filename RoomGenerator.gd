@@ -1,6 +1,9 @@
 extends Node2D
 
-var img = preload("res://Rooms/TestRoom.png")
+var chosenImg
+var img1 = preload("res://Rooms/TestRoom.png")
+var img2 = preload("res://Rooms/TestRoom2.png")
+var imgList = [img1, img2]
 #test
 var SceneRows = 9
 var SceneColumns = 9
@@ -19,7 +22,7 @@ var RoomsSpawned = []
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	SceneCentreRoom = [SceneRows/2, SceneColumns/2]
-	print("Scene centre room at ", SceneCentreRoom)
+	#print("Scene centre room at ", SceneCentreRoom)
 	var SceneRooms = []
 	for x in range(SceneRows):
 		SceneRooms.append([])
@@ -34,7 +37,7 @@ func _ready():
 		RoomSpawner()
 		#print(RoomsSpawned.size())
 	
-	print(RoomsSpawned)
+	#print(RoomsSpawned)
 	for i in range(RoomsSpawned.size()):
 		generateEdges(RoomsSpawned[i][0], RoomsSpawned[i][1])
 		#generateRoom(RoomsSpawned[i][0], RoomsSpawned[i][1])
@@ -42,9 +45,8 @@ func _ready():
 		
 func generateEdges(row :int, column :int):
 	var upPos = [row-1, column]
-	
-	print("Current Room Pos ", "Row ", row," , ","Column ",column)
-	print("Up Pos from Room ", upPos[0], upPos[1])
+	#print("Current Room Pos ", "Row ", row," , ","Column ",column)
+	#print("Up Pos from Room ", upPos[0], upPos[1])
 	var downPos = [row+1, column]
 	var leftPos = [row, column-1] 
 	var rightPos = [row, column+1]
@@ -85,27 +87,27 @@ func RoomSpawner():
 func addSurroundingRooms(row :int, column :int):
 	var up = [row-1, column]
 	#print(up)
-	if not checkIfExitsInArray(up[0],up[1], RoomList):
+	if not checkIfExitsInArray(up):
 		RoomList.append(up)
 		
 	var down = [row+1, column]
 	#print(down)
-	if not checkIfExitsInArray(down[0],down[1], RoomList):
+	if not checkIfExitsInArray(down):
 		RoomList.append(down)
 		
 	var left = [row, column-1]
 	#print(left)
-	if not checkIfExitsInArray(left[0],left[1], RoomList):
+	if not checkIfExitsInArray(left):
 		RoomList.append(left)
 		
 	var right = [row, column+1]
 	#print(right)
-	if not checkIfExitsInArray(right[0],right[1], RoomList):
+	if not checkIfExitsInArray(right):
 		RoomList.append(right)
 	
-func checkIfExitsInArray(row :int, column :int, array :Array) -> bool:
-	for i in range(array.size()):
-		if array[i] == [row, column]:
+func checkIfExitsInArray(pos) -> bool:
+	for i in range(RoomList.size()):
+		if RoomList[i] == pos:
 			return true
 		else:
 			return false
@@ -117,6 +119,10 @@ func generateRoom(SceneRoomNumRow :int, SceneRoomNumColumn :int, up :bool = fals
 		room.append([])
 		for y in range(RoomColumns):
 			room[x].append(0)
+			
+	randomize()
+	var randImg = int(rand_range(0,imgList.size()))
+	chosenImg = imgList[randImg]
 	
 	#Settings the rooms layout
 	for i in range(RoomRows):
@@ -145,8 +151,8 @@ func generateRoom(SceneRoomNumRow :int, SceneRoomNumColumn :int, up :bool = fals
 	roomNum = roomNum + 1
 				
 func getPixelColour(i :int, j :int) -> int:
-	img.lock()
-	var x = img.get_pixel(i, j)
+	chosenImg.lock()
+	var x = chosenImg.get_pixel(i, j)
 	if x:
 		return 0
 	else:
