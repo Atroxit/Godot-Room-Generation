@@ -1,10 +1,12 @@
 extends Node2D
 
-var chosenImg
+var wall = load("res://Wall.tscn")
+
 var img1 = preload("res://Rooms/TestRoom.png")
 var img2 = preload("res://Rooms/TestRoom2.png")
 var imgList = [img1, img2]
-#test
+var chosenImg
+
 var SceneRows = 9
 var SceneColumns = 9
 var SceneGridSpacing = 64
@@ -18,6 +20,8 @@ var roomNum = 0
 var RoomAmount = 16
 var RoomList = []
 var RoomsSpawned = []
+
+var startRoomSpawned = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -119,10 +123,14 @@ func generateRoom(SceneRoomNumRow :int, SceneRoomNumColumn :int, up :bool = fals
 		room.append([])
 		for y in range(RoomColumns):
 			room[x].append(0)
-			
-	randomize()
-	var randImg = int(rand_range(0,imgList.size()))
-	chosenImg = imgList[randImg]
+	
+	if not startRoomSpawned:
+		chosenImg = imgList[0]
+		startRoomSpawned = true
+	else:
+		randomize()
+		var randImg = int(rand_range(0,imgList.size()))
+		chosenImg = imgList[randImg]
 	
 	#Settings the rooms layout
 	for i in range(RoomRows):
@@ -146,25 +154,25 @@ func generateRoom(SceneRoomNumRow :int, SceneRoomNumColumn :int, up :bool = fals
 	for i in range(RoomRows):
 		for j in range(RoomColumns):
 			if room[i][j] == 1: 
-				spawnWall(i, j, roomNum, SceneRoomNumRow, SceneRoomNumColumn)
+				spawnWall(i, j, roomNum, SceneRoomNumRow, SceneRoomNumColumn, wall)
 	
 	roomNum = roomNum + 1
 				
 func getPixelColour(i :int, j :int) -> int:
 	chosenImg.lock()
 	var x = chosenImg.get_pixel(i, j)
-	if x:
-		return 0
-	else:
-		return 1
+	match x:
+		Color(0,0,0,1): #wall
+			return 1
+	
+	return 0 #nothing
 
-func spawnWall(Row :int, Column :int, roomNum :int, SceneRoomNumRow :int, SceneRoomNumColumn :int):
+func spawnWall(Row :int, Column :int, roomNum :int, SceneRoomNumRow :int, SceneRoomNumColumn :int, object :Object):
 	var gridRow = Row * RoomGridSpacing
 	var gridColumn = Column * RoomGridSpacing
 	var roomSceneOffsetRow = SceneRoomNumRow * SceneGridSpacing
 	var roomSceneOffsetColumn = SceneRoomNumColumn * SceneGridSpacing
-	var wall = load("res://Wall.tscn")
-	var iWall = wall.instance()
-	add_child(iWall)
-	#iWall.position = Vector2(gridRow + roomSceneOffsetRow, gridColumn + roomSceneOffsetColumn)
-	iWall.position = Vector2(gridColumn + roomSceneOffsetColumn, gridRow + roomSceneOffsetRow)
+	
+	var spawnedObject = object.instance()
+	add_child(spawnedObject)
+	spawnedObject.position = Vector2(gridColumn + roomSceneOffsetColumn, gridRow + roomSceneOffsetRow)
